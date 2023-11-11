@@ -13,24 +13,6 @@ library(tidyr)
 library(broom)
 library(ggplot2)
 library(forcats)
-
-knitr::opts_chunk$set(
-	echo = TRUE,
-	warning = FALSE,
-  fig.width = 6,
-  fig.asp = .6,
-  out.width = "90%"
-)
-
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
-
-options(
-  ggplot2.continuous.colour = "viridis",
-  ggplot2.continuous.fill = "viridis"
-)
-
-scale_colour_discrete = scale_colour_viridis_d
-scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Problem 1
@@ -95,7 +77,8 @@ all_cities_tidy |>
   theme(axis.text.x=element_text(angle = 45,hjust = 1)) +
   labs(title = "Estimates and Confidence Intervals for Unsolved Homicides by City",
        x = "City, State",
-       y = "Estimated Proportion of Unsolved Homicides")
+       y = "Estimated Proportion of Unsolved Homicides") +
+  theme(axis.text.x = element_text(size = 7))
 ```
 
 
