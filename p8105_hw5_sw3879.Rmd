@@ -1,0 +1,66 @@
+---
+title: "p8105_hw5_sw3879"
+author: "Siqing Wang"
+date: "2023-11-11"
+output: html_document
+---
+
+```{r, include = FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(dplyr)
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Problem 1
+
+Read in the raw data, create a new `city_state` variable
+```{r}
+homicide = read.csv("data/homicide-data.csv") |> 
+  janitor::clean_names() |> 
+  mutate(
+    city_state = paste(city, state, sep = ", ")
+  )
+```
+
+The raw dataset has `r nrow(homicide)` observations and `r ncol(homicide)` variables, which are `r colnames(homicide)`
+
+Summarize within cities
+```{r}
+homicide_summary = homicide |> group_by(city_state) |> 
+   summarize(total_homicides = n(),
+             unsolved_homicides = sum(disposition %in% c("Closed without arrest", "Open/No arrest"))
+   )
+
+homicide_summary
+```
+
+Estimate the proportion of homicides that are unsolved in Baltimore MD
+```{r}
+baltimore_test = prop.test(
+  homicide_summary |> filter(city_state == "Baltimore, MD") |> pull(unsolved_homicides),
+  homicide_summary |> filter(city_state == "Baltimore, MD") |> pull(total_homicides)
+) |>  broom::tidy()
+```
+
+The estimated proportion of unsolved homicides is `r baltimore_test |> pull(estimate)`. 
+The confidence interval is [`r baltimore_test |> pull(conf.low)`, `r baltimore_test |> pull(conf.high)`].
+
+
+
