@@ -123,6 +123,84 @@ q2_tidy |> ggplot(aes(x = week, y = value, color = arm)) +
        y = "Data Value")
 ```
 
+## Problem 3
+
+Set up experiment
+```{r}
+n = 30
+sigma = 5
+mu_values = 0:6
+reps = 5000
+power_results = data.frame()
+estimate_results = data.frame()
+```
+
+Set up function
+```{r}
+test_func = function(data, true_mu = 0) {
+  t_test_result = tidy(t.test(data, mu = true_mu))
+  p_value = t_test_result$p.value
+  estimate = t_test_result$estimate
+  
+  return(list(p_value = p_value, estimate = estimate))
+}
+```
+
+Run the function
+```{r}
+for (mu in mu_values) {
+  rejected_count = 0
+  rejected_estimates = c()
+  estimates = c()
+  
+  for (i in 1:reps) {
+    data = rnorm(n, mean = mu, sd = sigma)
+    test_result = test_func(data)
+    
+    if (test_result$p_value < 0.05) {
+      rejected_count = rejected_count + 1
+      rejected_estimates = c(rejected_estimates, test_result$estimate)
+    } else {
+      estimates = c(estimates, test_result$estimate)
+    }
+  }
+  
+  power = rejected_count / reps
+  
+  power_results = rbind(power_results, data.frame(mu = mu, power = power))
+  
+  if (length(rejected_estimates) > 0) {
+    avg_estimate_rejected = mean(rejected_estimates)
+  } else {
+    avg_estimate_rejected = NA
+  }
+  
+  if (length(estimates) > 0) {
+    avg_estimate = mean(estimates)
+  } else {
+    avg_estimate = NA
+  }
+  
+  estimate_results = rbind(estimate_results, data.frame(mu = mu, avg_estimate = avg_estimate, avg_estimate_rejected = avg_estimate_rejected))
+}
+```
+
+```{r}
+ggplot(power_results, aes(x = mu, y = power)) +
+  geom_line() +
+  labs(x = "True value of μ", y = "Power") +
+  geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(estimate_results, aes(x = mu, y = avg_estimate)) +
+  geom_line() +
+  labs(x = "True value of μ", y = "Average μ̂") +
+  geom_point(data = estimate_results[!is.na(estimate_results$avg_estimate_rejected), ], aes(y = avg_estimate_rejected), color = "red") +
+  theme_minimal()
+```
+
 
 
 
