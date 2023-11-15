@@ -91,7 +91,7 @@ q2_combined = map2(file_names, q2_raw, ~mutate(.y, file_name = .x)) |>
   bind_rows()
 ```
 
-Tidy the dataset
+Creating a tidy dataframe 
 ```{r}
 q2_tidy = q2_combined |> 
   separate(file_name, into = c("path", "file"), sep = "/") |> 
@@ -122,6 +122,7 @@ q2_tidy |> ggplot(aes(x = week, y = value, color = arm)) +
        x = "Week",
        y = "Data Value")
 ```
+Based on the plot, we can see that for most of the 10 participants, the experimental group has higher data value observations compared with control group. The general trend of the experimental group is data is increasing across weeks, while there is no clear trend for the control data. 
 
 ## Problem 3
 
@@ -190,10 +191,12 @@ ggplot(power_results, aes(x = mu, y = power)) +
     x = "True value of μ", y = "Power")
 ```
 
+Effect size is the difference in means between the two groups divided by the standard deviation of the null group. In this case, as we test through different true μ against H0 = 0, as true μ increases, effect size increases. And according to the plot, the power increases as effect size increases, reach power = 1 when true μ = 6. 
+
 ```{r}
 ggplot(estimate_results, aes(x = mu, y = avg_estimate)) +
-  geom_line(aes(color = "avg estimate"), show.legend = TRUE) +
-  labs(title = "μ hat estimate vs. true μ",
+  geom_line(aes(color = "avg estimate"), show.legend = TRUE) + geom_point() +
+  labs(title = "μ_hat estimate vs. true μ",
        x = "True value of μ", 
        y = "Average μ̂") +
  geom_point(data = estimate_results, aes(y = avg_estimate_rejected, 
@@ -201,6 +204,6 @@ ggplot(estimate_results, aes(x = mu, y = avg_estimate)) +
   scale_color_manual(values = c("avg estimate" = "blue", "avg rejected estimate" = "red"), labels = c("avg estimate", "avg rejected estimate")) 
 ```
 
-
+When true μ = 0 or when true μ is larget (> 4), we can see that the average estimate of μ_hat when null is rejected is equal to the true μ. When the true μ = 0, we are testing this against the H0 μ = 0, so both estimates will be close. When true μ is 1 - 3, this deviation starts out large and gradually becomes smaller, because more and more reps out of the 5000 gets rejected, and the estimate from the rejected group will tend toward the true μ. By when true μ is very large, basically all reps out of the 5000 reps get rejected, so the estimate from the rejected group would again be very similar to the true μ. 
 
 
