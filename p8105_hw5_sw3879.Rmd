@@ -92,7 +92,7 @@ q2_combined = map2(file_names, q2_raw, ~mutate(.y, file_name = .x)) |>
 ```
 
 Creating a tidy dataframe 
-```{r}
+```{r, warning = FALSE}
 q2_tidy = q2_combined |> 
   separate(file_name, into = c("path", "file"), sep = "/") |> 
   separate(file, into = c("arm", "id"), sep = "_|\\.") |> 
@@ -141,8 +141,8 @@ Set up function
 ```{r}
 test_func = function(data, true_mu = 0) {
   t_test_result = tidy(t.test(data, mu = true_mu))
-  p_value = t_test_result$p.value
-  estimate = t_test_result$estimate
+  p_value = pull(t_test_result, p.value)
+  estimate = pull(t_test_result, estimate)
   
   return(list(p_value = p_value, estimate = estimate))
 }
@@ -159,12 +159,12 @@ for (mu in mu_values) {
     data = rnorm(n, mean = mu, sd = sigma)
     test_result = test_func(data)
     
-    if (test_result$p_value < 0.05) {
+    if (test_result[["p_value"]] < 0.05) {
       rejected_count = rejected_count + 1
-      rejected_estimates = c(rejected_estimates, test_result$estimate)
+      rejected_estimates = c(rejected_estimates, test_result[["estimate"]])
     } 
     
-    estimates = c(estimates, test_result$estimate)
+    estimates = c(estimates, test_result[["estimate"]])
     
   }
   
@@ -204,6 +204,10 @@ ggplot(estimate_results, aes(x = mu, y = avg_estimate)) +
   scale_color_manual(values = c("avg estimate" = "blue", "avg rejected estimate" = "red"), labels = c("avg estimate", "avg rejected estimate")) 
 ```
 
-When true μ = 0 or when true μ is larget (> 4), we can see that the average estimate of μ_hat when null is rejected is equal to the true μ. When the true μ = 0, we are testing this against the H0 μ = 0, so both estimates will be close. When true μ is 1 - 3, this deviation starts out large and gradually becomes smaller, because more and more reps out of the 5000 gets rejected, and the estimate from the rejected group will tend toward the true μ. By when true μ is very large, basically all reps out of the 5000 reps get rejected, so the estimate from the rejected group would again be very similar to the true μ. 
+When true μ = 0 or when true μ is larger (> 4), we can see that the average estimate of μ_hat when null is rejected is equal to the true μ. When the true μ = 0, we are testing this against the H0 μ = 0, so both estimates will be close. 
+
+When true μ is 1 - 3, this deviation starts out large and gradually becomes smaller. This is because while estimates of the fail-to-reject-null group is close to 0, estimates of the rejected groups will be close to the true μ, and as true μ increases, more and more reps out of the 5000 gets rejected, and the estimate from the rejected group will tend toward the true μ.
+
+By when true μ is very large, basically all reps out of the 5000 reps get rejected, so the estimate from the rejected group would again be very similar to the true μ. 
 
 
